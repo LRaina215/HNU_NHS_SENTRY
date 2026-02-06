@@ -1,0 +1,11 @@
+pcd2pgm_node:
+  ros__parameters:
+    resolution: 0.1
+    min_points_in_pix: 0
+    max_points_in_pix: 1
+    min_height: -30.0
+    max_height: 0.0
+    input_pcd: "/home/rm/shaobing/src/rm_navi/rm_localization/point_lio/PCD/scans.pcd"
+    dest_directory: "/home/rm/shaobing/src/rm_navi/rm_localization/pcd2pgm/map"
+    output_pgm_name: "test"
+    
