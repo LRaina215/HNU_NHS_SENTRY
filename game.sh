@@ -20,6 +20,6 @@ cmds=(
 for cmd in "${cmds[@]}";
 do
      echo Current CMD : "$cmd"
-     gnome-terminal -- bash -c "cd $(pwd);source /home/robomaster/shaobing/install/setup.bash;$cmd;exec bash;"
+     gnome-terminal -- bash -c "cd $(pwd);source /home/lraina/shaobing/install/setup.bash;$cmd;exec bash;"
      sleep 0.2
 done

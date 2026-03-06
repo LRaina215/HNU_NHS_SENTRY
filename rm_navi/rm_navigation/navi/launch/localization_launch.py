@@ -32,8 +32,8 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
     params_file = LaunchConfiguration('params_file')
-    lifecycle_nodes = ['map_server', 'amcl']
-    # lifecycle_nodes = ['map_server'] # 移除2维定位，防止与ICP冲突
+    # lifecycle_nodes = ['map_server', 'amcl']
+    lifecycle_nodes = ['map_server'] # 移除2维定位，防止与ICP冲突
 
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
@@ -66,7 +66,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             'map',
-            default_value=os.path.join(bringup_dir, 'maps', 'test.yaml'),
+            default_value=os.path.join(bringup_dir, 'maps', 'test_fl2.yaml'),
             description='Full path to map yaml file to load'),
 
         DeclareLaunchArgument(
@@ -90,13 +90,13 @@ def generate_launch_description():
             parameters=[configured_params],
             remappings=remappings),
 
-        Node(
-            package='nav2_amcl',
-            executable='amcl',
-            name='amcl',
-            output='screen',
-            parameters=[configured_params],
-            remappings=remappings),
+        # Node(
+        #     package='nav2_amcl',
+        #     executable='amcl',
+        #     name='amcl',
+        #     output='screen',
+        #     parameters=[configured_params],
+        #     remappings=remappings),
 
         Node(
             package='nav2_lifecycle_manager',

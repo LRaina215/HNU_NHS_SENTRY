@@ -1,6 +1,6 @@
 cmds=(
 #       "ros2 launch navi slam_launch.py"
-      "ros2 launch icp_registration icp.launch.py"
+#      "ros2 launch icp_registration icp.launch.py" 
       "ros2 launch navi localization_launch.py"
       "ros2 launch navi navigation_launch.py"
 #      "ros2 topic echo /tf"

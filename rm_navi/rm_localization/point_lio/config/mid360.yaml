@@ -1,7 +1,8 @@
 /**:
     ros__parameters:
         common:
-            lid_topic: "/livox/lidar"
+#            lid_topic: "/livox/lidar_no_body"	# linefit 点云分割参数
+            lid_topic: "/livox/lidar"		# terrian 点云分割参数
             imu_topic: "/livox/imu"
             con_frame: false # true: if you need to combine several LiDAR frames into one
             con_frame_num: 1 # the number of frames combined
@@ -11,7 +12,7 @@
             # the timestamp of IMU is transferred from the current timeline to LiDAR's timeline by subtracting this value
 
         preprocess:
-            lidar_type: 1      # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR
+            lidar_type: 3      # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR
             scan_line: 4
             timestamp_unit: 3   # the unit of time/t field in the PointCloud2 rostopic: 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
             blind: 0.5
@@ -41,9 +42,15 @@
             gravity: [ 0.0, 0.0, -9.810 ] # [0.0, 9.810, 0.0] # gravity to be aligned
             gravity_init: [ 0.0, 0.0, -9.810 ] # [0.0, 9.810, 0.0] # # preknown gravity in the first IMU body frame, use when imu_en is false or start from a non-stationary state
             extrinsic_T: [ -0.011, -0.02329, 0.04412 ]
-            extrinsic_R: [ 1.0, 0.0, 0.0,
-                           0.0, 1.0, 0.0,
-                           0.0, 0.0, 1.0 ]
+            # extrinsic_R: [ 1.0, 0.0, 0.0,
+            #                0.0, 1.0, 0.0,
+            #                0.0, 0.0, 1.0 ]
+            extrinsic_R: [  0.0,  1.0, 0.0,
+                           -1.0,  0.0, 0.0,
+                            0.0,  0.0, 1.0 ]
+            # extrinsic_R: [  0.0, -1.0, 0.0,
+            #                 1.0,  0.0, 0.0,
+            #                 0.0,  0.0, 1.0 ]
 
         odometry:
             publish_odometry_without_downsample: true
@@ -51,9 +58,9 @@
         publish:
             path_en: true                 # false: close the path output
             scan_publish_en: true         # false: close all the point cloud output
-            scan_bodyframe_pub_en: true  # true: output the point cloud scans in IMU-body-frame 转发pointclud2格式的点云数据
+            scan_bodyframe_pub_en: false  # true: output the point cloud scans in IMU-body-frame
 
         pcd_save:
-            pcd_save_en: false           #  是否保存pcd地图
+            pcd_save_en: true
             interval: -1                 # how many LiDAR frames saved in each pcd file;
             # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.

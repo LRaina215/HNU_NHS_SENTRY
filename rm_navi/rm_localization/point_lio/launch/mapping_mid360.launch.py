@@ -12,6 +12,15 @@ def generate_launch_description():
         'rviz', default_value='true',
         description='Flag to launch RViz.')
 
+    # 【新增】定义过滤节点
+    # 注意：这里的 executable 必须和 setup.py 里 console_scripts 定义的名字一致
+    # filter_node = Node(
+    #     package='rm_lidar_filter',
+    #     executable='lidar_filter',
+    #     name='lidar_filter_node',
+    #     output='screen'
+    # )
+
     # Node parameters, including those from the YAML configuration file
     laser_mapping_params = [
         PathJoinSubstitution([
@@ -58,6 +67,7 @@ def generate_launch_description():
     # Assemble the launch description
     ld = LaunchDescription([
         rviz_arg,
+#        filter_node,        # 【新增】把过滤节点加进启动列表，建议放在 laserMapping 前面
         laser_mapping_node,
         # GroupAction(
         #    actions=[rviz_node],

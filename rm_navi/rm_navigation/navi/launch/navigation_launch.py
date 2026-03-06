@@ -1,27 +1,13 @@
 # Copyright (c) 2018 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Licensed under the Apache License, Version 2.0
 
 import os
-
 from ament_index_python.packages import get_package_share_directory
-
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from nav2_common.launch import RewrittenYaml
-
 
 def generate_launch_description():
     # Get the launch directory
@@ -31,8 +17,9 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
     params_file = LaunchConfiguration('params_file')
-    default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
-    map_subscribe_transient_local = LaunchConfiguration('map_subscribe_transient_local')
+    
+    # 【核心修改】定义您的行为树绝对路径变量 NOTE: 无论如何这SB导航只会读nav2在/opt/ros~下行为树文件，所以这里只是给指路，最后替换行为树要去官方默认路径下替换官方行为树--/opt/ros/galactic/share/nav2_bt_navigator/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml       
+    my_bt_xml_path = '/home/lraina/shaobing/src/rm_navi/rm_navigation/navi/params/navigate_to_pose_w_replanning_and_recovery.xml'
 
     lifecycle_nodes = ['controller_server',
                        'planner_server',
@@ -40,21 +27,15 @@ def generate_launch_description():
                        'bt_navigator',
                        'waypoint_follower']
 
-    # Map fully qualified names to relative ones so the node's namespace can be prepended.
-    # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
-    # https://github.com/ros/geometry2/issues/32
-    # https://github.com/ros/robot_state_publisher/pull/30
-    # TODO(orduno) Substitute with `PushNodeRemapping`
-    #              https://github.com/ros2/launch_ros/issues/56
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
 
     # Create our own temporary YAML files that include substitutions
     param_substitutions = {
         'use_sim_time': use_sim_time,
-        'default_bt_xml_filename': default_bt_xml_filename,
-        'autostart': autostart,
-        'map_subscribe_transient_local': map_subscribe_transient_local}
+        # 强制将 YAML 中的参数替换为我们的路径
+        'default_bt_xml_filename': my_bt_xml_path,
+        'autostart': autostart}
 
     configured_params = RewrittenYaml(
             source_file=params_file,
@@ -63,7 +44,6 @@ def generate_launch_description():
             convert_types=True)
 
     return LaunchDescription([
-        # Set env var to print messages to stdout immediately
         SetEnvironmentVariable('RCUTILS_LOGGING_BUFFERED_STREAM', '1'),
 
         DeclareLaunchArgument(
@@ -85,9 +65,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             'default_bt_xml_filename',
-            default_value=os.path.join(
-                get_package_share_directory('nav2_bt_navigator'),
-                'behavior_trees', 'navigate_w_replanning_and_recovery.xml'),
+            default_value=my_bt_xml_path,
             description='Full path to the behavior tree xml file to use'),
 
         DeclareLaunchArgument(
@@ -110,6 +88,14 @@ def generate_launch_description():
             remappings=remappings),
 
         Node(
+            package='smart_escape',
+            executable='smart_escape_server',
+            name='smart_escape_server',
+            output='screen',
+            parameters=[configured_params], # 使用相同的参数文件读取算法阈值
+            remappings=remappings),
+
+        Node(
             package='nav2_recoveries',
             executable='recoveries_server',
             name='recoveries_server',
@@ -122,7 +108,8 @@ def generate_launch_description():
             executable='bt_navigator',
             name='bt_navigator',
             output='screen',
-            parameters=[configured_params],
+            # 【核心修改】强制注入参数字典，双重保险
+            parameters=[configured_params, {'default_bt_xml_filename': my_bt_xml_path}],
             remappings=remappings),
 
         Node(
@@ -141,5 +128,4 @@ def generate_launch_description():
             parameters=[{'use_sim_time': use_sim_time},
                         {'autostart': autostart},
                         {'node_names': lifecycle_nodes}]),
-
     ])
